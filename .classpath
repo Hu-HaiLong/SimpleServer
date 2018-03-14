@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="lib/gson-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.2.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.2.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.39-bin.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

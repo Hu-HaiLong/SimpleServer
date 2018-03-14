@@ -52,11 +52,11 @@ public class U3dApplication {
      * 初始化系统 
      */  
     private void init() {  
-          Gson gson = new Gson();
-          UserData t = new UserData(1001, "xiaoxiao",1,33111);
-          String str = gson.toJson(t);
-          System.out.println(str);
-          UserData te = gson.fromJson(str, UserData.class);
-          System.out.println(te.getId() + "  " + te.getName());
+//          Gson gson = new Gson();
+//          UserData t = new UserData(1001, "xiaoxiao",1,33111);
+//          String str = gson.toJson(t);
+//          System.out.println(str);
+//          UserData te = gson.fromJson(str, UserData.class);
+//          System.out.println(te.getId() + "  " + te.getName());
     }  
 }  

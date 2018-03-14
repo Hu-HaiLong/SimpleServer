@@ -43,15 +43,15 @@ public class U3dServer implements Runnable {
 					Socket socket = u3dServerSocket.accept();
 					System.out.println("客户端接入");
 					
-					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					System.out.println("bufferedReader:" + bufferedReader);
+//					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //	                channelToken = bufferedReader.readLine();
-					channelToken = bufferedReader.toString();
-	                System.out.println("channelToken:" + channelToken);
-	                socketList.put(channelToken,socket);   //保存会话ID和socket
-	                System.out.println("clientList : " + socketList.size() + "  ---");
+//					channelToken = bufferedReader.toString();
+//	                socketList.put(channelToken,socket);   //保存会话ID和socket
+//	                System.out.println("clientList : " + socketList.size() + "  ---");
+//					
+//	                new RequestReceiver(socket,fm,socketList).start();
 					
-	                new RequestReceiver(socket,fm,socketList).start();
+	                new RequestReceiver(socket).start();
 				}
 			} catch (IOException e) {
 				System.err.println("服务器接入失败");
@@ -85,17 +85,21 @@ public class U3dServer implements Runnable {
 		private int messageLengthBytes = 1024;
 
 		private Socket socket;
-		   private  HashMap<String, Socket> clientList = new HashMap<String, Socket>();
+		
+		private  HashMap<String, Socket> clientList = new HashMap<String, Socket>();
 		FightManager fm;
 		
 		/** socket输入处理流 */
 		private BufferedInputStream bis = null;
 
+		public RequestReceiver(Socket socket) {
+			this.socket = socket;
+		}
+		
 		public RequestReceiver(Socket socket,FightManager fm,HashMap<String, Socket> socketList) {
 			this.socket = socket;
 			this.fm = fm;
 			this.clientList = socketList;
-			System.out.println("clientList : " + clientList.size() + "  ---");
 		}
 
 		@Override
@@ -105,12 +109,10 @@ public class U3dServer implements Runnable {
 				bis = new BufferedInputStream(socket.getInputStream());
 				byte[] buf = new byte[messageLengthBytes];
 
-
 				/**
 				 * 在Socket报文传输过程中,应该明确报文的域
 				 */
 				while (true) {
-					System.out.println("fm.vo.size() : " + fm.vo.size() + "  ++--");
 					/*
 					 * 这种业务处理方式是根据不同的报文域,开启线程,采用不同的业务逻辑进行处理 依据业务需求而定
 					 */
@@ -121,42 +123,29 @@ public class U3dServer implements Runnable {
 
 					// 输出接到的数据
 					System.out.println(str);
-					System.out.println("_______________________");
 					// 反序列化
 					JsonReader jsonReader = new JsonReader(
 							new StringReader(str));
 					jsonReader.setLenient(true);
 					Gson gson = new Gson();
-					UserData te = gson.fromJson(jsonReader, UserData.class);
-					System.out.println(te.getId() + "  " + te.getName());
-					System.out.println("_______________________");
-					
-					//
 					
 					
-					if(fm.vo.size()<10)
+					//向客户端传输数据的字节数组
+					UserAccount te = gson.fromJson(jsonReader, UserAccount.class);
+					System.out.println(te.ServerAccount +"  "+ te.ServerPwd +"     asd  ");
+					if(te.ServerAccount.equals("111111") && te.ServerPwd.equals("111111"))
 					{
-						fm.vo.add(te);
+						OutputStream out = socket.getOutputStream();
+						out.write(new String("20").getBytes());
+						//
+						MySQLConnect.getAll();
 					}
-
-					System.out.println("fm.vo.size() : " + fm.vo.size() + "  +-++");
-	
-					for(UserData vo:fm.vo)
+					else
 					{
-						// 向客户端传输数据的字节数组
-						String s = gson.toJson(vo);
-						System.out.println("_______向客户端发送数据______");
-//						OutputStream out = socket.getOutputStream();
-//						out.write(new String(s).getBytes());
-						for (Socket value : clientList.values()) {
-							OutputStream out = value.getOutputStream();
-							out.write(new String(s).getBytes());
-						}
-						System.out.println("_______发完了_______");
-					}		
-					
+						OutputStream out = socket.getOutputStream();
+						out.write(new String("21").getBytes());
+					}
 				}
-
 			} catch (IOException e) {
 				System.err.println("读取报文出错");
 			} finally {
@@ -168,7 +157,6 @@ public class U3dServer implements Runnable {
 					socket = null;
 				}
 			}
-
 		}
 	}
 }
